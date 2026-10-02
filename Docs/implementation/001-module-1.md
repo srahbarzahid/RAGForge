@@ -23,6 +23,13 @@ From `backend`, run `python -m scripts.check_database`. Start the API and fronte
 
 Credentials belong only in ignored local env files. Unit/API tests use generated test signing keys and do not claim hosted-project verification.
 
+## Hosted verification (2026-10-02)
+
+- The configured Supabase project is active, and its PostgreSQL database answered a read-only `SELECT 1` through the Supabase connection.
+- The direct database endpoint is IPv6-only from this development machine. The ignored local `DATABASE_URL` now uses the project's working IPv4 Session pooler; `python -m scripts.check_database` passed through the application's SQLAlchemy connection.
+- The project's JWKS exposes an ES256 public signing key. FastAPI `/api/v1/auth/me` returned 401 for a missing token and for a forged token using the project's real JWKS.
+- A 200 response with a real user token and the browser sign-in flow remain unverified because the project has no users yet. Confirmation email and SMTP setup are deferred.
+
 ## RLS boundary for Module 2
 
 Supabase Auth owns `auth.users`. Module 2 creates application tables. For each table exposed directly through Supabase, enable RLS and add `authenticated` policies that compare indexed ownership columns against `(select auth.uid())`, with `WITH CHECK` for writes. Tables without a direct `user_id` need a parent ownership check. The backend PostgreSQL connection may use a privileged database role, so FastAPI must independently filter and verify ownership on every operation. No permissive table policy is created before the schema exists.
