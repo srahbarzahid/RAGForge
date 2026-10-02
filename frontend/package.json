@@ -2,22 +2,28 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write app components lib services",
-    "format:check": "prettier --check app components lib services"
+    "format:check": "prettier --check app components lib services scripts prisma.config.mjs",
+    "db:generate": "prisma generate",
+    "db:check": "node scripts/check-prisma.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "lucide-react": "^1.49.0",
     "next": "16.3.8",
+    "pg": "8.23.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "^4.21.1",
@@ -25,9 +31,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "dotenv": "16.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "prettier": "^3.9.9",
+    "prisma": "7.10.0",
     "tailwindcss": "^4"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2",
+    "mysql2": "3.24.5"
   }
 }

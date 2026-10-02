@@ -4,11 +4,11 @@ RAGForge is a private document intelligence portal. Its planned workflow is sign
 
 ## Current state
 
-Module 0 is implemented. Module 1 has Supabase email/password Auth pages, JWT verification, and a PostgreSQL connection factory. Live registration and database connectivity require project settings in ignored local env files. Confirmation email and SMTP setup are deferred. The relational schema, uploads, retrieval, chat, and infrastructure integrations are scheduled for later modules. See [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md) for setup and verification.
+Module 0 and Module 1 are implemented. Module 1 has Supabase email/password Auth pages, live JWT verification, and PostgreSQL connections through FastAPI SQLAlchemy and a server-only Next.js Prisma Client. Confirmation email and SMTP setup are deferred. Application tables, uploads, retrieval, chat, and infrastructure integrations are scheduled for later modules. See [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md) for setup and verification.
 
 ## Stack and boundaries
 
-- Frontend: Next.js App Router, React, JavaScript, Tailwind CSS, shadcn/ui.
+- Frontend: Next.js App Router, React, JavaScript, Tailwind CSS, shadcn/ui, and server-only Prisma.
 - API: Python, FastAPI. Supabase Auth and PostgreSQL connection code is in Module 1; application tables arrive in Module 2.
 - Planned supporting services: Qdrant vectors, private object storage, Redis, Celery, Kafka, LangGraph, and LLM providers in the order specified by the module execution plan.
 - Frontend browser code must contain only public Supabase configuration. Private credentials belong on the server.
@@ -38,4 +38,4 @@ To run checks, execute `python -m ruff check .`, `python -m ruff format --check 
 
 ## Configuration
 
-Copy `.env.example` to `.env` and set up `frontend/.env.local` to connect a Supabase project. Keep actual credentials out of Git. The browser may only receive `NEXT_PUBLIC_*` settings. The Module 1 setup steps are in [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md).
+Copy `.env.example` to `.env` and set up `frontend/.env.local` to connect a Supabase project. Set `DATABASE_URL` in both ignored files so FastAPI and server-only Prisma can connect. Keep actual credentials out of Git; only `NEXT_PUBLIC_*` settings reach the browser. The Module 1 setup steps are in [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md).
