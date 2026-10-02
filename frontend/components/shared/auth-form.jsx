@@ -48,7 +48,7 @@ export function AuthForm({ mode }) {
         router.refresh();
       } else if (isRegister) {
         setErrorMessage(
-          "Email confirmation is still enabled in Supabase. Turn off Confirm Email in the Email provider settings, then sign in.",
+          "Account created, but a session is not available yet. Please sign in when your account is ready.",
         );
       } else {
         setErrorMessage("Sign in did not create a session. Please try again.");
