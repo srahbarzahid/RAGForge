@@ -4,7 +4,7 @@ RAGForge is a private document intelligence portal. Its planned workflow is sign
 
 ## Current state
 
-Module 0 is implemented. Module 1 has Supabase Auth pages, email confirmation, JWT verification, and a PostgreSQL connection factory. A hosted Supabase project has not been configured in this workspace, so live registration and database connectivity remain unverified. The relational schema, uploads, retrieval, chat, and infrastructure integrations are scheduled for later modules. See [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md) for setup and verification.
+Module 0 is implemented. Module 1 has Supabase email/password Auth pages with immediate signup when Confirm Email is disabled, JWT verification, and a PostgreSQL connection factory. Live registration and database connectivity require project settings in ignored local env files. The relational schema, uploads, retrieval, chat, and infrastructure integrations are scheduled for later modules. See [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md) for setup and verification.
 
 ## Stack and boundaries
 

@@ -22,7 +22,6 @@ export function AuthForm({ mode }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [pending, setPending] = useState(false);
   const isRegister = mode === "register";
   const configured = Boolean(
@@ -33,7 +32,6 @@ export function AuthForm({ mode }) {
   async function handleSubmit(event) {
     event.preventDefault();
     setErrorMessage("");
-    setSuccessMessage("");
     const supabase = getSupabaseClient();
     if (!supabase) {
       setErrorMessage("Supabase project settings are missing.");
@@ -42,22 +40,18 @@ export function AuthForm({ mode }) {
     setPending(true);
     try {
       const result = isRegister
-        ? await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/auth/confirm`,
-            },
-          })
+        ? await supabase.auth.signUp({ email, password })
         : await supabase.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
       if (result.data.session) {
         router.replace("/dashboard");
         router.refresh();
-      } else {
-        setSuccessMessage(
-          "Check your email to confirm your account, then sign in.",
+      } else if (isRegister) {
+        setErrorMessage(
+          "Email confirmation is still enabled in Supabase. Turn off Confirm Email in the Email provider settings, then sign in.",
         );
+      } else {
+        setErrorMessage("Sign in did not create a session. Please try again.");
       }
     } catch (error) {
       setErrorMessage(
@@ -113,11 +107,6 @@ export function AuthForm({ mode }) {
             {errorMessage && (
               <p role="alert" className="text-sm text-destructive">
                 {errorMessage}
-              </p>
-            )}
-            {successMessage && (
-              <p role="status" className="text-sm">
-                {successMessage}
               </p>
             )}
             <Button type="submit" disabled={pending || !configured}>
