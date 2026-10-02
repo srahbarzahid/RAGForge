@@ -6,7 +6,7 @@
 - Registration uses Supabase email/password Auth. The app does not request or process confirmation emails. The hosted project's own Auth settings determine whether signup returns an immediate session.
 - FastAPI `GET /api/v1/auth/me` verifies a Bearer token against the configured project's JWKS, including signature, expiry, issuer, audience, authenticated role, and UUID subject. Invalid tokens return 401. An unavailable key service returns 503.
 - SQLAlchemy creates a TLS-required PostgreSQL connection pool. `python -m scripts.check_database` runs a read-only connection check.
-- Next.js has a server-only Prisma Client with the PostgreSQL adapter. `npm run db:check` runs a read-only query through the same Supabase Session pooler. The Prisma schema intentionally has no application models until Module 2.
+- Next.js has a server-only Prisma Client with the PostgreSQL adapter. `npm run db:check` runs a read-only query through the same Supabase Session pooler. Module 2 maps the application tables; see `002-module-2.md`.
 
 ## Hosted project setup
 
@@ -34,4 +34,4 @@ Credentials belong only in ignored local env files. Unit/API tests use generated
 
 ## RLS boundary for Module 2
 
-Supabase Auth owns `auth.users`. Module 2 creates application tables. For each table exposed directly through Supabase, enable RLS and add `authenticated` policies that compare indexed ownership columns against `(select auth.uid())`, with `WITH CHECK` for writes. Tables without a direct `user_id` need a parent ownership check. The backend PostgreSQL connection may use a privileged database role, so FastAPI must independently filter and verify ownership on every operation. No permissive table policy is created before the schema exists.
+Supabase Auth owns `auth.users`. Module 2 creates application tables. Direct table access is currently closed to `anon` and `authenticated`; RLS is enabled without public policies. If a later module deliberately exposes a table directly, add narrowly scoped `authenticated` policies using indexed ownership columns and `WITH CHECK` for writes. The backend PostgreSQL connection may use a privileged database role, so FastAPI must independently filter and verify ownership on every operation.

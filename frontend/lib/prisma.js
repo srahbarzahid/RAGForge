@@ -19,7 +19,12 @@ if (
 }
 
 const globalForPrisma = globalThis;
-connectionUrl.searchParams.set("sslmode", "require");
+const sslRootCert = process.env.DATABASE_SSL_ROOT_CERT;
+connectionUrl.searchParams.set(
+  "sslmode",
+  sslRootCert ? "verify-full" : "require",
+);
+if (sslRootCert) connectionUrl.searchParams.set("sslrootcert", sslRootCert);
 connectionUrl.searchParams.set("uselibpqcompat", "true");
 
 export const prisma =

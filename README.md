@@ -4,7 +4,7 @@ RAGForge is a private document intelligence portal. Its planned workflow is sign
 
 ## Current state
 
-Module 0 and Module 1 are implemented. Module 1 has Supabase email/password Auth pages, live JWT verification, and PostgreSQL connections through FastAPI SQLAlchemy and a server-only Next.js Prisma Client. Confirmation email and SMTP setup are deferred. Application tables, uploads, retrieval, chat, and infrastructure integrations are scheduled for later modules. See [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md) for setup and verification.
+Modules 0–2 are implemented. Module 1 has Supabase email/password Auth pages, live JWT verification, and PostgreSQL connections through FastAPI SQLAlchemy and a server-only Next.js Prisma Client. Module 2 adds the eight relational application tables with Alembic migrations, ownership constraints, and closed direct-client access. Confirmation email and SMTP setup are deferred. Uploads, retrieval, chat, and infrastructure integrations are scheduled for later modules. See [`Docs/implementation/001-module-1.md`](Docs/implementation/001-module-1.md) and [`Docs/implementation/002-module-2.md`](Docs/implementation/002-module-2.md).
 
 ## Stack and boundaries
 
@@ -34,7 +34,7 @@ npm.cmd run dev
 
 Open <http://localhost:3000> and <http://localhost:8000/health>. The API docs are at <http://localhost:8000/docs>.
 
-To run checks, execute `python -m ruff check .`, `python -m ruff format --check .`, and `python -m pytest` from `backend`, then `npm.cmd run lint`, `npm.cmd run format:check`, and `npm.cmd run build` from `frontend`. On systems with GNU Make, equivalent targets are in the root `Makefile`.
+To run checks, execute `python -m ruff check .`, `python -m ruff format --check .`, and `python -m pytest` from `backend`, then `npm.cmd run lint`, `npm.cmd run format:check`, and `npm.cmd run build` from `frontend`. Apply schema changes from `backend` with `.venv/Scripts/alembic.exe upgrade head`, then run `.venv/Scripts/python.exe -m scripts.check_schema`. On systems with GNU Make, equivalent lint, test, and build targets are in the root `Makefile`.
 
 ## Configuration
 

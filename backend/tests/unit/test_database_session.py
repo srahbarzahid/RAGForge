@@ -27,6 +27,7 @@ def test_database_factory_requires_postgresql(monkeypatch):
 
 
 def test_database_factory_normalizes_url_and_requires_tls(monkeypatch):
+    monkeypatch.delenv("DATABASE_SSL_ROOT_CERT", raising=False)
     monkeypatch.setenv(
         "DATABASE_URL", "postgresql://example:secret@db.example/postgres"
     )
@@ -43,3 +44,19 @@ def test_database_factory_normalizes_url_and_requires_tls(monkeypatch):
         max_overflow=5,
         connect_args={"sslmode": "require"},
     )
+
+
+def test_database_factory_verifies_host_with_ca(monkeypatch):
+    monkeypatch.setenv(
+        "DATABASE_URL", "postgresql://example:secret@db.example/postgres"
+    )
+    monkeypatch.setenv("DATABASE_SSL_ROOT_CERT", "/private/supabase-ca.crt")
+    create_engine = Mock()
+    monkeypatch.setattr(session, "create_engine", create_engine)
+
+    session.get_engine()
+
+    assert create_engine.call_args.kwargs["connect_args"] == {
+        "sslmode": "verify-full",
+        "sslrootcert": "/private/supabase-ca.crt",
+    }

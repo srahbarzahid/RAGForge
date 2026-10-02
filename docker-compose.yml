@@ -1,12 +1,22 @@
 services:
   api:
     build: ./backend
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
     ports:
       - "8000:8000"
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "3000:3000"
     depends_on:

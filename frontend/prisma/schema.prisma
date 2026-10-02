@@ -3,5 +3,147 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider     = "postgresql"
+  relationMode = "prisma"
+}
+
+// Application model mirror. Alembic owns DDL and PostgreSQL enforces FKs.
+// Keep Prisma calls on the server and route user-owned workflows through FastAPI.
+model Profile {
+  id         String   @id @db.Uuid
+  full_name  String?
+  status     String   @default("ACTIVE")
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("profiles")
+}
+
+model KnowledgeBase {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id              String   @db.Uuid
+  name                 String
+  description          String?
+  status               String   @default("ACTIVE")
+  embedding_provider   String?
+  embedding_model      String?
+  chunk_strategy       String?
+  chunk_target_tokens  Int      @default(500)
+  chunk_max_tokens     Int      @default(800)
+  chunk_overlap_tokens Int      @default(75)
+  version              Int      @default(1)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([id, user_id])
+  @@index([user_id], map: "knowledge_bases_user_id_idx")
+  @@map("knowledge_bases")
+}
+
+model Document {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String    @db.Uuid
+  knowledge_base_id String    @db.Uuid
+  filename          String
+  original_filename String
+  mime_type         String
+  size_bytes        BigInt
+  storage_key       String    @unique
+  checksum          String
+  status            String    @default("UPLOADED")
+  version           Int       @default(1)
+  is_active         Boolean   @default(true)
+  page_count        Int?
+  chunk_count       Int?
+  processing_error  String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime? @db.Timestamptz(6)
+
+  @@unique([id, user_id])
+  @@index([user_id, knowledge_base_id], map: "documents_user_kb_idx")
+  @@index([knowledge_base_id, status], map: "documents_kb_status_idx")
+  @@index([knowledge_base_id, user_id], map: "documents_kb_user_idx")
+  @@map("documents")
+}
+
+model Conversation {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String   @db.Uuid
+  knowledge_base_id String   @db.Uuid
+  title             String?
+  status            String   @default("ACTIVE")
+  started_at        DateTime @default(now()) @db.Timestamptz(6)
+  last_activity_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([id, user_id])
+  @@index([user_id, last_activity_at(sort: Desc)], map: "conversations_user_activity_idx")
+  @@index([knowledge_base_id], map: "conversations_kb_idx")
+  @@index([knowledge_base_id, user_id], map: "conversations_kb_user_idx")
+  @@map("conversations")
+}
+
+model Message {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String   @db.Uuid
+  conversation_id String   @db.Uuid
+  role            String
+  content         String
+  model           String?
+  input_tokens    Int?
+  output_tokens   Int?
+  latency_ms      Int?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([id, user_id])
+  @@index([conversation_id, created_at], map: "messages_conversation_created_idx")
+  @@index([user_id], map: "messages_user_id_idx")
+  @@index([conversation_id, user_id], map: "messages_conversation_user_idx")
+  @@map("messages")
+}
+
+model Feedback {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  message_id String   @db.Uuid
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, message_id])
+  @@index([message_id], map: "feedback_message_id_idx")
+  @@index([message_id, user_id], map: "feedback_message_user_idx")
+  @@map("feedback")
+}
+
+model UsageRecord {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String?  @db.Uuid
+  knowledge_base_id String?  @db.Uuid
+  request_type      String
+  input_tokens      Int      @default(0)
+  output_tokens     Int      @default(0)
+  embedding_tokens  Int      @default(0)
+  latency_ms        Int?
+  estimated_cost    Decimal? @db.Decimal(18, 8)
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id, created_at(sort: Desc)], map: "usage_records_user_created_idx")
+  @@index([knowledge_base_id], map: "usage_records_kb_idx")
+  @@map("usage_records")
+}
+
+model AuditLog {
+  id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String?              @db.Uuid
+  action        String
+  resource_type String
+  resource_id   String?              @db.Uuid
+  metadata      Json                 @default("{}")
+  ip_address    Unsupported("inet")?
+  created_at    DateTime             @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id, created_at(sort: Desc)], map: "audit_logs_user_created_idx")
+  @@index([resource_type, resource_id], map: "audit_logs_resource_idx")
+  @@map("audit_logs")
 }
